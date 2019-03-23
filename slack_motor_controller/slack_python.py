@@ -2,7 +2,9 @@ import requests
 from flask import Flask
 from flask import request
 import os
-import motor-controller
+import motor_controller
+
+import threading
 
 # app-server
 app = Flask(__name__)
@@ -17,7 +19,10 @@ def login():
     payload = '{"text":"'+ username + ' is closing the cash register"}'
     head = {"Content-type": "application/json"} 
     r = requests.post(url=URL, data=payload, headers=head)
-    motor-controller.rotate()
+
+    t = threading.Thread(target=motor_controller.rotate)
+    t.start()
+
     return username + ' We are processing your request, please wait...', 200
         
 app.run(debug=True)

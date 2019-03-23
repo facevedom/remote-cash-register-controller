@@ -21,7 +21,7 @@ def rotate():
         [1,0,0,1]
     ]
 
-    for i in range(512):
+    for i in range(512*30):
         for halfstep in range(8):
             for pin in range(4):
                 GPIO.output(control_pins[pin], halfstep_seq[halfstep][pin])
