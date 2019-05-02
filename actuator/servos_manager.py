@@ -57,6 +57,3 @@ def close_register(register_id):
 
     unlock(lock_file)
     logging.info('---- Closed %s ----', register_id)    
-
-if __name__ == "__main__":
-    close_register("CASH-REGISTER-1")
