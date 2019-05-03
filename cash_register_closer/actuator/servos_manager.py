@@ -38,8 +38,12 @@ def close_register(register_id):
     logging.info('---- Closing %s ----', register_id)
 
     try:
-        SERVO_CONTROL_PIN = int(config[register_id]['SERVO_CONTROL_PIN'])
-        SERVO_FRECUENCY = int(config[register_id]['SERVO_FRECUENCY'])
+        SERVO_CONTROL_PIN = int(
+            config[register_id]['SERVO_CONTROL_PIN'])
+        SERVO_DELAY = int(
+            config[register_id]['SERVO_DELAY'])
+        SERVO_FRECUENCY = int(
+            config[register_id]['SERVO_FRECUENCY'])
         SERVO_INITIAL_POSITION = int(
             config[register_id]['SERVO_INITIAL_POSITION'])
         SERVO_MIDDLE_POSITION = int(
@@ -55,6 +59,7 @@ def close_register(register_id):
 
     current_servo = Servo(
         SERVO_CONTROL_PIN,
+        SERVO_DELAY,
         SERVO_FRECUENCY,
         SERVO_INITIAL_POSITION,
         SERVO_MIDDLE_POSITION,
