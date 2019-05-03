@@ -1,8 +1,8 @@
 import os
 import time
-from config_loader import load_config, config_file_path
-from logger import logging
-from actuator import servo
+from actuator.servo import Servo
+from helpers.logger import logging
+from helpers.config_loader import load_config, config_file_path
 
 config = load_config()
 
@@ -53,7 +53,7 @@ def close_register(register_id):
     lock_file = "../lock"
     lock(lock_file)
 
-    current_servo = servo.Servo(
+    current_servo = Servo(
         SERVO_CONTROL_PIN,
         SERVO_FRECUENCY,
         SERVO_INITIAL_POSITION,

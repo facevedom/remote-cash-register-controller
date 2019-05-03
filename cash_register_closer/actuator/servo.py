@@ -1,5 +1,5 @@
 import time
-from logger import logging
+from helpers.logger import logging
 import RPi.GPIO as GPIO
 
 
