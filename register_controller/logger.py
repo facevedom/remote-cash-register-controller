@@ -2,7 +2,8 @@ import logging
 from config_loader import load_config
 
 config = load_config()
-logging_path = "{}/servo_manager.log".format(config['SYSTEM']['WORKING_DIRECTORY'])
+logging_path = "{}/servo_manager.log".format(
+    config['SYSTEM']['WORKING_DIRECTORY'])
 
 logging.basicConfig(
     filename=logging_path,
