@@ -29,5 +29,6 @@ node {
     // increase version with build
     stage('Build') {
         sh "tar vpczf dist.tar.gz --exclude='Jenkinsfile' --exclude='__pycache__'  --exclude='.[^/]*' ."
+        archiveArtifacts artifacts: 'dist.tar.gz', fingerprint: true, onlyIfSuccessful: true
     }
 }
