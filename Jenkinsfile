@@ -14,15 +14,9 @@ node {
         sh "${pip} install -r requirements.txt"
     }
 
-    stage ('Test') {
-        dir('cash_register_closer') {
-            sh "${python} test.py"
-        }
-    }
-
-    stage('test') {
+    stage('Test') {
         try {
-            sh '${python} test.py'
+            sh "${python} test.py"
         } catch (e) {
             error 'Unit tests failed'
         } finally {
