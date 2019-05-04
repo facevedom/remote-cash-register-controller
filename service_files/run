@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# check Ngrok status
+NGROK_API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:4040/api)
+
+if [ $NGROK_API_STATUS -ne '200' ]; then
+    echo "   >>> NGROK is not running, starting it"
+    systemctl start ngrok.service
+else
+    echo ">>> NGROK is already running, we will not touch it"
+fi
+
+python3 ##MAIN_SCRIPT_PATH##

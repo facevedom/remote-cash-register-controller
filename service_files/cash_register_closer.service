@@ -1,0 +1,11 @@
+[Unit]
+Description=Cash register closer
+After=multi-user.target
+ 
+[Service]
+Type=simple
+ExecStart=/bin/bash ##RUN_SCRIPT_PATH##
+Restart=on-abort
+ 
+[Install]
+WantedBy=multi-user.target

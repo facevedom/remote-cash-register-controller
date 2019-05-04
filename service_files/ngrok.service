@@ -1,0 +1,11 @@
+[Unit]
+Description=Ngrok
+After=multi-user.target
+ 
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/ngrok start -config ##NGROK_CONFIG_PATH## --all
+Restart=on-abort
+ 
+[Install]
+WantedBy=multi-user.target
