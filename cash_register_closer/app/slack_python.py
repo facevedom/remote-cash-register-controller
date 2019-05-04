@@ -7,7 +7,7 @@ import os
 import json
 import threading
 
-conn = sqlite3.connect('./app/cash_register.db')
+conn = sqlite3.connect('cash_register.db')
 c = conn.cursor()
 # c.execute('''CREATE TABLE reservation
 #              (user text, date text, initialHour int, initialMinute int, finishHour int, finishMinute int)''')
@@ -81,5 +81,6 @@ def addRoutes():
 
 def initializeApp():
     addRoutes()
+
 initializeApp()
 app.run(debug=True, port=5000)
