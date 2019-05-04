@@ -4,6 +4,8 @@ node {
     def pip = 'pip3'
 
     stage ('Checkout') {
+        cleanWs()
+        
         git branch: 'develop', 
             url: 'https://github.com/facevedom/remote-cash-register-controller'
     }
