@@ -25,4 +25,11 @@ node {
             junit "${src_dir}/test-reports/*.xml"
         }
     }
+
+    // increase version with build
+    stage('Build') {
+        sh 'mkdir dist'
+        sh "tar vpczf dist/dist.tar.gz --exclude='dist' --exclude='Jenkinsfile' --exclude='__pycache__'  --exclude='.[^/]*' ."
+        archiveArtifacts artifacts: 'dist/dist.tar.gz', fingerprint: true, onlyIfSuccessful: true
+    }
 }
