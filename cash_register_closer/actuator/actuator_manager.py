@@ -10,6 +10,41 @@ class ActuatorManager:
         self.__config = config
         self.__servos_locked = False
         self.__request_queue = []
+        self.__cash_registers = []
+        self.__servos = {}
+        
+        self.list_available_cash_registers()
+        self.bootstrap_servos()
+
+    def list_available_cash_registers(self):
+        for property in self.__config:
+            if 'SERVO_CONTROL_PIN' in self.__config[property]:
+                self.__cash_registers.append(property)
+        logging.info('Found these cash registers: %s', self.__cash_registers)
+    
+    def bootstrap_servos(self):
+        for cash_register in self.__cash_registers:
+            try:
+                servo_properties = self.__config[cash_register]
+                CONTROL_PIN = int(servo_properties['SERVO_CONTROL_PIN'])
+                DELAY = float(servo_properties['SERVO_DELAY'])
+                FRECUENCY = int(servo_properties['SERVO_FRECUENCY'])
+                INITIAL_POSITION = int(servo_properties['SERVO_INITIAL_POSITION'])
+                MIDDLE_POSITION = int(servo_properties['SERVO_MIDDLE_POSITION'])
+            except Exception:
+                logging.exception(
+                    "Error when reading properties from configuration for %s", cash_register)
+                raise
+
+            current_servo = Servo(
+                CONTROL_PIN,
+                DELAY,
+                FRECUENCY,
+                INITIAL_POSITION,
+                MIDDLE_POSITION,
+            )
+
+            self.__servos[cash_register] = current_servo
 
     def request_closing(self, register_id):
         if register_id in self.__request_queue:
@@ -27,36 +62,8 @@ class ActuatorManager:
         self.__request_queue.remove(register_id)
 
     def close_register(self, register_id):
-        self.__servos_locked = True
         logging.info('---------- Closing %s ----------', register_id)
-
-        try:
-            SERVO_CONTROL_PIN = int(
-                self.__config[register_id]['SERVO_CONTROL_PIN'])
-            SERVO_DELAY = float(
-                self.__config[register_id]['SERVO_DELAY'])
-            SERVO_FRECUENCY = int(
-                self.__config[register_id]['SERVO_FRECUENCY'])
-            SERVO_INITIAL_POSITION = int(
-                self.__config[register_id]['SERVO_INITIAL_POSITION'])
-            SERVO_MIDDLE_POSITION = int(
-                self.__config[register_id]['SERVO_MIDDLE_POSITION'])
-        except Exception:
-            logging.exception(
-                "Error when reading properties from configuration")
-            raise
-
-        current_servo = Servo(
-            SERVO_CONTROL_PIN,
-            SERVO_DELAY,
-            SERVO_FRECUENCY,
-            SERVO_INITIAL_POSITION,
-            SERVO_MIDDLE_POSITION,
-        )
-
-        current_servo.close_register()
-
-        time.sleep(3)
-
+        self.__servos_locked = True
+        self.__servos[register_id].pivot()
         self.__servos_locked = False
         logging.info('---------- Closed  %s ----------', register_id)

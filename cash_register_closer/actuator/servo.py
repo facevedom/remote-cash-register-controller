@@ -12,23 +12,12 @@ class Servo:
         self.__initial_position = initial_position
         self.__middle_position = middle_position
 
-        try:
-            GPIO.setmode(GPIO.BOARD)
-            GPIO.setup(self.__control_pin, GPIO.OUT)
-            logging.debug("Communication with GPIOs established")
-        except Exception:
-            logging.exception("Failed to setup GPIO")
-            raise
-
-        self.actuator = GPIO.PWM(self.__control_pin, self.__frecuency)
-        self.actuator.start(self.__initial_position)
-
     def move(self, position):
         logging.debug("Moving servo to position '%s'", position)
-        self.actuator.ChangeDutyCycle(position)
+        self.__actuator.ChangeDutyCycle(position)
 
     def teardown(self):
-        self.actuator.stop()
+        self.__actuator.stop()
         try:
             GPIO.cleanup()
             logging.debug("Communication with GPIOs closed")
@@ -36,7 +25,20 @@ class Servo:
             logging.exception("Failed to teardown GPIO channels")
             raise
 
-    def close_register(self):
+    def setup(self):
+        try:
+            GPIO.setmode(GPIO.BOARD)
+            GPIO.setup(self.__control_pin, GPIO.OUT)
+            logging.debug("Communication with GPIOs established for pin %s", self.__control_pin)
+        except Exception:
+            logging.exception("Failed to setup GPIO")
+            raise
+        
+        self.__actuator = GPIO.PWM(self.__control_pin, self.__frecuency)
+        self.__actuator.start(self.__initial_position)
+
+    def pivot(self):
+        self.setup()
         positions = [self.__initial_position,
                      self.__middle_position,
                      self.__initial_position]
