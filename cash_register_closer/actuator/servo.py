@@ -15,6 +15,7 @@ class Servo:
         try:
             GPIO.setmode(GPIO.BOARD)
             GPIO.setup(self.__control_pin, GPIO.OUT)
+            logging.debug("Communication with GPIOs established")
         except Exception:
             logging.exception("Failed to setup GPIO")
             raise
@@ -26,6 +27,15 @@ class Servo:
         logging.debug("Moving servo to position '%s'", position)
         self.actuator.ChangeDutyCycle(position)
 
+    def teardown(self):
+        self.actuator.stop()
+        try:
+            GPIO.cleanup()
+            logging.debug("Communication with GPIOs closed")
+        except Exception:
+            logging.exception("Failed to teardown GPIO channels")
+            raise
+
     def close_register(self):
         positions = [self.__initial_position,
                      self.__middle_position,
@@ -36,7 +46,3 @@ class Servo:
             self.move(position)
 
         self.teardown()
-
-    def teardown(self):
-        self.actuator.stop()
-        GPIO.cleanup()

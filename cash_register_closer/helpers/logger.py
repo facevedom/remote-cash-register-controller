@@ -1,5 +1,5 @@
 import logging
-from .config_loader import load_config
+from helpers.config_loader import load_config
 
 config = load_config()
 logging_path = "{}/actuator.log".format(
