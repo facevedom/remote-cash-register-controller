@@ -1,7 +1,7 @@
 node {
-
     def python = 'python3'
     def pip = 'pip3'
+    def src_dir = 'cash_register_closer'
 
     stage ('Checkout') {
         cleanWs()
@@ -16,13 +16,13 @@ node {
 
     stage('Test') {
         try {
-            dir('cash_register_closer') {
+            dir("${src_dir}") {
                 sh "${python} test.py"
             }
         } catch (e) {
             error 'Unit tests failed'
         } finally {
-            junit 'test-reports/*.xml'
+            junit "${src_dir}/test-reports/*.xml"
         }
     }
 }
