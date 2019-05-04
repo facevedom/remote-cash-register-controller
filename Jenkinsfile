@@ -16,7 +16,9 @@ node {
 
     stage('Test') {
         try {
-            sh "${python} test.py"
+            dir('cash_register_closer') {
+                sh "${python} test.py"
+            }
         } catch (e) {
             error 'Unit tests failed'
         } finally {
