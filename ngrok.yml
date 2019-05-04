@@ -1,0 +1,6 @@
+authtoken: ##NGROK_TOKEN##
+tunnels:
+  slack_bot:
+    proto: http
+    addr: 5000
+    bind_tls: true

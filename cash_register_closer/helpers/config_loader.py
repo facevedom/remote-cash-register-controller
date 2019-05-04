@@ -1,7 +1,7 @@
 import os
 import configparser
 
-config_file_path = "../config.ini"
+config_file_path = "config.ini" # this path is relative to the caller!
 
 
 def load_config(config_file_path=config_file_path):

@@ -1,6 +1,8 @@
 # remote-cash-register-controller
 Allows to remotely close a cash register
 
+Developed by Felipe Acevedo And Juan Mejia
+
 Runs with Python 3.x+
 
 # Installation
@@ -9,3 +11,6 @@ Runs with Python 3.x+
 
 # Running tests
 `python test.py`
+
+# Caveats
+- No other software can use Ngrok on the Raspberry when this is installed
