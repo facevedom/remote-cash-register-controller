@@ -12,5 +12,5 @@ Runs with Python 3.x+
 # Running tests
 `python test.py`
 
-Only this softwar can manage ngrok on this machine
-Ngrok needs to be on bin path
+# Caveats
+- No other software can use Ngrok on the Raspberry when this is installed

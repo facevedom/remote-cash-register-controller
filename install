@@ -4,12 +4,13 @@
 NGROK_TOKEN="$1"
 VERSION="$(grep VERSION config.ini | cut -f3 -d ' ')"
 WORKING_DIR="$(grep WORKING_DIRECTORY config.ini | cut -f3 -d ' ')"
+NGROK_BINARY_PATH="/usr/local/sbin/ngrok"
 
 # perform an installation
 install() {
     echo ">>> Installing version $VERSION on $WORKING_DIR"
     mkdir -p "$WORKING_DIR"
-    uninstall
+    clean_previous_version 
     ngrok_setup
     copy_source_code
     fetch_dependencies
@@ -17,9 +18,9 @@ install() {
 }
 
 # an installation could also be an update, so cleanup previous installation
-uninstall() {
+clean_previous_version () {
     echo ">>> Removing old version (if any)"
-    systemctl stop cash_register_closer.service
+    systemctl stop cash_register_closer.service 2>/dev/null
     mkdir -p "$WORKING_DIR"/old_logs
     mv "$WORKING_DIR"/*.log "$WORKING_DIR"/old_logs/ 2>/dev/null # move old logs
     rm -f "$WORKING_DIR"/config.ini 2>/dev/null
@@ -41,11 +42,11 @@ ngrok_setup() {
     sed -i -e "s/##NGROK_TOKEN##/$NGROK_TOKEN/g" "$WORKING_DIR"/ngrok.yml
 
     # if Ngrok is not in the expected path, download it
-    if [ ! -f /usr/local/sbin/ngrok ]; then
+    if [ ! -f "$NGROK_BINARY_PATH" ]; then
     echo ">>> Downloading Ngrok"
        wget -P /tmp https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.zip
        unzip /tmp/ngrok-stable-linux-arm.zip
-       mv ngrok /usr/local/sbin/ngrok
+       mv ngrok "$NGROK_BINARY_PATH"
     fi
 
     register_ngrok_service
@@ -104,4 +105,22 @@ register_ngrok_service() {
     systemctl enable ngrok.service
 }
 
-install
+completely_uninstall() {
+    # remove every trace of this software
+    clean_previous_version
+    rm -rf "$WORKING_DIR"
+    rm -f /lib/systemd/system/cash_register_closer.service 2>/dev/null
+    systemctl stop ngrok.service 2>/dev/null
+    rm -f /lib/systemd/system/ngrok.service 2>/dev/null
+    rm -f "$NGROK_BINARY_PATH"
+    systemctl daemon-reload
+
+    echo "Uninstall completed"
+}
+
+if [ "$1" == '--remove' ]; then
+    echo ">>> Removing the app"
+    completely_uninstall
+else
+    install
+fi
