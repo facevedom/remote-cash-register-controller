@@ -2,7 +2,7 @@ from enum import Enum
 class CashActions(Enum):
     CLOSE = 'close'
     RESERVE = 'reserve'
-    AVAILABILITY = 'availability'
+    RESERVATIONS = 'reservations'
 class SlackMessage(Enum):
     ACTION = 0
     CASH_REGISTER = 1
@@ -17,63 +17,50 @@ class ReservationTable(Enum):
     FINISH_HOUR = 4
 class ReservationTableQueries:
     INSERT = "INSERT INTO reservation VALUES ('%s' ,'%s', '%s', '%s', '%s')"
-    EXISTING_RESERVATION = 'SELECT * FROM reservation WHERE cashRegister = ? and date = ? and ? >= initialTimeReservation and ? <= initialTimeReservation or ? >= finishTimeReservation and ? <= finishTimeReservation'
+    EXISTING_RESERVATION = 'SELECT * FROM reservation WHERE cashRegister = ? and date = ? and (? >= initialTimeReservation and ? <= initialTimeReservation or ? >= finishTimeReservation and ? <= finishTimeReservation)'
     GET_RESERVATIONS = 'SELECT * FROM reservation WHERE cashRegister = ? and date = ? ORDER BY initialTimeReservation'
     CAN_CLOSE_CASH_REGISTER = 'SELECT * FROM reservation WHERE cashRegister = ? and date = ? and ? >= initialTimeReservation and ? <= finishTimeReservation'
 class ResponseSlack:
-    GENERIC = '{"text": "%s","channel": "%s"}'
-    RESPONSE_CHANNEL_ALL = '{"text":"%s"}'
-    CLOSING_CASH_REGISTER = '<@%s> is closing the cash register'
-    UNKNOWN = 'Yo no lo entiendos'
-    INVALID_ACTION = 'Invalid action'
-    CASH_REGISTER_NOT_AVAILABLE = '<@%s> Unfortunately the %s is not available at this time, it is reserved by <@%s>'
-    CASH_REGISTER_RESERVED = '<@%s> The %s have been reserved succesfully.'
-    PROCESSING_CLOSE_CASH = 'We are processing your request'
-    CASH_REGISTER_ALREADY_RESERVED = 'You cannot close the cash register, it is reserved by <@%s>'
-    CASH_REGISTER_NOT_RESERVED = 'You cannot close the cash register because you need reserve it'
-    TEST = '''{
-  "channel": "%s",
-  "blocks": [
-	{
-		"type": "section",
-		"text": {
-			"text": "A message *with some bold text* and _some italicized text_.",
-			"type": "mrkdwn"
-		},
-		"fields": [
+	GENERIC = '{"text": "%s","channel": "%s"}'
+	RESPONSE_CHANNEL_ALL = '{"text":"%s"}'
+	CLOSING_CASH_REGISTER = '<@%s> is closing the cash register'
+	INVALID_ACTION = '''{
+		"channel": "%s",
+		"blocks": [
 			{
-				"type": "mrkdwn",
-				"text": "*Usuario*"
-			},
-			{
-				"type": "mrkdwn",
-				"text": "*Fecha*"
-			},
-			{
-				"type": "mrkdwn",
-				"text": "*Hora inicio*"
-			},
-			{
-				"type": "mrkdwn",
-				"text": "*Hora fin*"
-			},
-			{
-				"type": "plain_text",
-				"text": "Juan"
-			},
-			{
-				"type": "plain_text",
-				"text": "2019-05-05"
-			},
-			{
-				"type": "plain_text",
-				"text": "5:30"
-			},
-			{
-				"type": "plain_text",
-				"text": "6:30"
+				"type": "section",
+				"text": {
+					"type": "mrkdwn",
+					"text": "Invalid action"
+				},
+				"accessory": {
+					"type": "image",
+					"image_url": "https://scontent.feoh1-1.fna.fbcdn.net/v/t1.0-9/22886279_1847002292276836_3724632587332837591_n.jpg?_nc_cat=107&_nc_ht=scontent.feoh1-1.fna&oh=5db69c676bd014fdbb627c42d0a75291&oe=5D67405C",
+					"alt_text": "plants"
+				}
 			}
-		]
-	}
-]
-}'''
+		]	
+	}'''
+	CASH_REGISTER_NOT_AVAILABLE = '<@%s> Unfortunately the %s is not available at this time, it is reserved by <@%s>'
+	CASH_REGISTER_RESERVED = '<@%s> The %s have been reserved succesfully.'
+	PROCESSING_CLOSE_CASH = 'We are processing your request'
+	CASH_REGISTER_ALREADY_RESERVED = 'You cannot close the cash register, it is reserved by <@%s>'
+	CASH_REGISTER_NOT_RESERVED = 'You cannot close the cash register because you need reserve it'
+	UNKNOWN = 'Try again'
+	INVALID_ACTION_COMMAND = '''{
+		"blocks": [
+			{
+				"type": "section",
+				"text": {
+					"type": "mrkdwn",
+					"text": "Invalid action"
+				},
+				"accessory": {
+					"type": "image",
+					"image_url": "https://scontent.feoh1-1.fna.fbcdn.net/v/t1.0-9/22886279_1847002292276836_3724632587332837591_n.jpg?_nc_cat=107&_nc_ht=scontent.feoh1-1.fna&oh=5db69c676bd014fdbb627c42d0a75291&oe=5D67405C",
+					"alt_text": "plants"
+				}
+			}
+		]	
+	}'''
+	RESERVATIONS_LIST = '{"channel": "%s", "blocks": %s}'
