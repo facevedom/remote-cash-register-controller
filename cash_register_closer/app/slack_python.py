@@ -60,21 +60,23 @@ def close_register():
             canClose, userReserved = canCloseCashRegister(user, cash_register)
             if canClose:
                 sendNotificationForTeam(user)
-                response = ResponseSlack.PROCESSING_CLOSE_CASH
+                payload = ResponseSlack.RESPONSE_CHANNEL_ALL % ResponseSlack.PROCESSING_CLOSE_CASH
+
+                # t = threading.Thread(target=motor_controller.rotate)
+                # t.start()
             else:
                 if userReserved:
-                    response = ResponseSlack.CASH_REGISTER_ALREADY_RESERVED % userReserved
+                    text = ResponseSlack.CASH_REGISTER_ALREADY_RESERVED % userReserved
+                    payload = ResponseSlack.RESPONSE_CHANNEL_ALL % text
                 else:
-                    response = ResponseSlack.CASH_REGISTER_NOT_RESERVED
+                    payload = ResponseSlack.RESPONSE_CHANNEL_ALL % ResponseSlack.CASH_REGISTER_NOT_RESERVED
         else:
-            response = ResponseSlack.INVALID_ACTION
+            payload = ResponseSlack.INVALID_ACTION_COMMAND
     else:
-        response = ResponseSlack.UNKNOWN
-    # print(request.form)
-    # t = threading.Thread(target=motor_controller.rotate)
-    # t.start()
-
-    return response, 200
+        payload = ResponseSlack.RESPONSE_CHANNEL_ALL % ResponseSlack.UNKNOWN
+    head = {"Content-type": "application/json"} 
+    response = Response(payload,200,head)
+    return response
 
 def getAvailability(cash_register, date, initial_hour, finish_hour, sql_service):
     sql_service.execute(ReservationTableQueries.EXISTING_RESERVATION, [cash_register, date, initial_hour, initial_hour, finish_hour, finish_hour])
@@ -104,8 +106,21 @@ def doReservation(message, sql_service, userId, channel):
 def getReservations(sql_service, cash_register, date, channel):
     sql_service.execute(ReservationTableQueries.GET_RESERVATIONS, [cash_register, date])
     data = sql_service.fetchall()
-    print(data)
-    return ResponseSlack.TEST % (channel)
+    listReservations = []
+    for register in data:
+        listReservations.append(
+            {
+            "type": "divider"
+            }
+        )
+        text = '{"type": "plain_text","text": "%s %s from %s to %s","emoji": true}' % (register[ReservationTable.CASH_REGISTER.value], register[ReservationTable.DATE.value], register[ReservationTable.INITIAL_HOUR.value], register[ReservationTable.FINISH_HOUR.value])
+        textCustom = {
+            "type": "section",
+            "text": json.loads(text)
+        }
+        user = register[0]
+        listReservations.append(textCustom)
+    return ResponseSlack.RESERVATIONS_LIST % (channel, listReservations)
 def ResponseSlackBot(messagePayload):
     payload = messagePayload
     bearer = "Bearer %s" % TOKEN
@@ -119,12 +134,12 @@ def processRequest(text, clientId, userId, channel):
         action = message[SlackMessage.ACTION.value]
         if action == CashActions.RESERVE.value:
             messagePayload = doReservation(message, sql_service, userId, channel)
-        elif action == CashActions.AVAILABILITY.value:
+        elif action == CashActions.RESERVATIONS.value:
             cash_register = message[SlackMessage.CASH_REGISTER.value]
             date = message[SlackMessage.DATE.value]
             messagePayload = getReservations(sql_service, cash_register, date, channel)
         else:
-            messagePayload = ResponseSlack.GENERIC % (ResponseSlack.INVALID_ACTION, channel)
+            messagePayload = ResponseSlack.INVALID_ACTION % channel
     else:
         messagePayload = ResponseSlack.GENERIC % (ResponseSlack.UNKNOWN, channel)
     ResponseSlackBot(messagePayload)
@@ -132,10 +147,10 @@ def processRequest(text, clientId, userId, channel):
     messageStack.remove(clientId)
 
 def chat_bot():
-    process = False
-    clientId = request.get_json().get('event').get('client_msg_id')
     if request.get_json().get('challenge'):
         return request.get_json().get('challenge'), 200
+    process = False
+    clientId = request.get_json().get('event').get('client_msg_id')
     try:
         messageStack.index(clientId)
         process = False
