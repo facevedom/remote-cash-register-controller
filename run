@@ -12,3 +12,4 @@ fi
 # start application
 cd "$( cd "$(dirname "$0")" ; pwd -P )"
 python3 ##MAIN_SCRIPT_PATH##
+# python3 cash_register_closer/main.py

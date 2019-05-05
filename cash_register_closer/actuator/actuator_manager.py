@@ -12,7 +12,7 @@ class ActuatorManager:
         self.__request_queue = []
         self.__cash_registers = []
         self.__servos = {}
-        
+
         self.list_available_cash_registers()
         self.bootstrap_servos()
 
@@ -21,7 +21,7 @@ class ActuatorManager:
             if 'SERVO_CONTROL_PIN' in self.__config[property]:
                 self.__cash_registers.append(property)
         logging.info('Found these cash registers: %s', self.__cash_registers)
-    
+
     def bootstrap_servos(self):
         for cash_register in self.__cash_registers:
             try:
@@ -29,8 +29,10 @@ class ActuatorManager:
                 CONTROL_PIN = int(servo_properties['SERVO_CONTROL_PIN'])
                 DELAY = float(servo_properties['SERVO_DELAY'])
                 FRECUENCY = int(servo_properties['SERVO_FRECUENCY'])
-                INITIAL_POSITION = int(servo_properties['SERVO_INITIAL_POSITION'])
-                MIDDLE_POSITION = int(servo_properties['SERVO_MIDDLE_POSITION'])
+                INITIAL_POSITION = int(
+                    servo_properties['SERVO_INITIAL_POSITION'])
+                MIDDLE_POSITION = int(
+                    servo_properties['SERVO_MIDDLE_POSITION'])
             except Exception:
                 logging.exception(
                     "Error when reading properties from configuration for %s", cash_register)
