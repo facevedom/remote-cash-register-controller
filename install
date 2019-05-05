@@ -1,0 +1,143 @@
+#!/bin/bash
+
+# set required variables
+NGROK_TOKEN="$1"
+SLACK_URL="$2"
+SLACK_TOKEN="$3"
+VERSION="$(grep VERSION config.ini | cut -f3 -d ' ')"
+WORKING_DIR="$(grep WORKING_DIRECTORY config.ini | cut -f3 -d ' ')"
+NGROK_BINARY_PATH="/usr/local/sbin/ngrok"
+
+# perform an installation
+install() {
+    echo ">>> Installing version $VERSION on $WORKING_DIR"
+    mkdir -p "$WORKING_DIR"
+    clean_previous_version 
+    ngrok_setup
+    copy_source_code
+    set_env_variables
+    fetch_dependencies
+    register_system_service    
+}
+
+# an installation could also be an update, so cleanup previous installation
+clean_previous_version () {
+    echo ">>> Removing old version (if any)"
+    systemctl stop cash_register_closer.service 2>/dev/null
+    mkdir -p "$WORKING_DIR"/old_logs
+    mv "$WORKING_DIR"/*.log "$WORKING_DIR"/old_logs/ 2>/dev/null # move old logs
+    rm -f "$WORKING_DIR"/config.ini 2>/dev/null
+    rm -rf "$WORKING_DIR"/cash_register_closer 2>/dev/null
+    rm -f "$WORKING_DIR"/requirements.txt 2>/dev/null
+    rm -f "$WORKING_DIR"/README.md 2>/dev/null
+    rm -f /lib/systemd/system/cash_register_closer.service 2>/dev/null
+}
+
+# install and register Ngrok service
+ngrok_setup() {
+    if [ "$NGROK_TOKEN" == '' ]; then
+        echo "Please add a valid Ngrok token as argument!"
+        exit 1
+    fi
+
+    echo ">>> Setting up Ngrok"
+    cp -f ngrok.yml "$WORKING_DIR"
+    sed -i -e "s/##NGROK_TOKEN##/$NGROK_TOKEN/g" "$WORKING_DIR"/ngrok.yml
+
+    # if Ngrok is not in the expected path, download it
+    if [ ! -f "$NGROK_BINARY_PATH" ]; then
+    echo ">>> Downloading Ngrok"
+       wget -P /tmp https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.zip
+       unzip /tmp/ngrok-stable-linux-arm.zip
+       mv ngrok "$NGROK_BINARY_PATH"
+    fi
+
+    register_ngrok_service
+}
+
+set_env_variables() {
+    if [ "$SLACK_URL" == '' ]; then
+        echo "Please add a valid Slack URL as argument!"
+        exit 1
+    fi
+    if [ "$SLACK_TOKEN" == '' ]; then
+        echo "Please add a valid Slack token as argument!"
+        exit 1
+    fi
+
+    sed -i -e "s/##SLACK_TOKEN##/$SLACK_TOKEN/g" "$WORKING_DIR"/config.ini
+    sed -i -e "s@##SLACK_URL##@$SLACK_URL@g" "$WORKING_DIR"/config.ini
+}
+
+copy_source_code() {
+    echo ">>> Copying source code"
+    cp -rf cash_register_closer "$WORKING_DIR"/cash_register_closer
+    cp -f requirements.txt "$WORKING_DIR"
+    cp -f config.ini "$WORKING_DIR"
+    cp -f README.md "$WORKING_DIR"
+    cp -f run "$WORKING_DIR"
+}
+
+# this will globally install the Python3 dependencies!
+fetch_dependencies() {
+    echo ">>> Installing Python dependencies"
+    # if this step fails, installation exits with error
+    pip3 install -r "$WORKING_DIR"/requirements.txt
+    if [ $? -ne 0 ]; then
+        exit 1
+    fi
+}
+
+register_system_service() {
+    echo ">>> Registering system service"
+    MAIN_SCRIPT_PATH="$WORKING_DIR"/cash_register_closer/main.py
+    RUN_SCRIPT_PATH="$WORKING_DIR"/run
+
+    # copy service file
+    cp -f service_files/cash_register_closer.service /lib/systemd/system/
+    sed -i -e "s@##MAIN_SCRIPT_PATH##@$MAIN_SCRIPT_PATH@g" "$WORKING_DIR"/run
+    sed -i -e "s@##RUN_SCRIPT_PATH##@$RUN_SCRIPT_PATH@g" /lib/systemd/system/cash_register_closer.service
+    chmod 644 /lib/systemd/system/cash_register_closer.service
+    chmod +x "$MAIN_SCRIPT_PATH"
+    chmod +x "$RUN_SCRIPT_PATH"
+
+    # register and run service
+    systemctl daemon-reload
+    systemctl enable cash_register_closer.service
+    systemctl start cash_register_closer.service
+}
+
+register_ngrok_service() {
+    echo ">>> Registering Ngrok service"
+    NGROK_CONFIG_PATH="$WORKING_DIR"/ngrok.yml
+
+    # copy service file
+    cp -f service_files/ngrok.service /lib/systemd/system/
+    sed -i -e "s@##NGROK_CONFIG_PATH##@$NGROK_CONFIG_PATH@g" /lib/systemd/system/ngrok.service
+    chmod 644 /lib/systemd/system/ngrok.service
+
+    # register and run service
+    # this doesn't take into account when Ngrok config changes between versions
+    systemctl daemon-reload
+    systemctl enable ngrok.service
+}
+
+completely_uninstall() {
+    # remove every trace of this software
+    clean_previous_version
+    rm -rf "$WORKING_DIR"
+    rm -f /lib/systemd/system/cash_register_closer.service 2>/dev/null
+    systemctl stop ngrok.service 2>/dev/null
+    rm -f /lib/systemd/system/ngrok.service 2>/dev/null
+    rm -f "$NGROK_BINARY_PATH"
+    systemctl daemon-reload
+
+    echo "Uninstall completed"
+}
+
+if [ "$1" == '--remove' ]; then
+    echo ">>> Removing the app"
+    completely_uninstall
+else
+    install
+fi
