@@ -8,6 +8,7 @@ Runs with Python 3.x+
 # Installation
 - Copy code to /opt/remote-cash-register-controller/
 - Create /opt/remote-cash-register-controller/application.log file and make 'pi' the owner
+- Export env vars
 
 # Running tests
 `python test.py`
