@@ -1,0 +1,19 @@
+node {
+    stage ('Fetch artifact') {
+        copyArtifacts(projectName: 'cash-register-closer/continuous-integration');
+    }
+
+    stage ('Extract arctifact') {
+        sh 'tar xzvf dist/dist.tar.gz .'
+    }
+
+    stage ('Install') {
+        withCredentials([
+            string(credentialsId: 'e7302e45-ecae-4666-ae1d-1f3198add531', variable: 'NGROK_TOKEN'), 
+            string(credentialsId: 'e926b931-ff29-4b3a-aa39-fe8e316a6ae7', variable: 'SLACK_TOKEN'), 
+            string(credentialsId: 'cabf2281-06aa-4494-b51d-a01225544c0e', variable: 'SLACK_URL')
+        ]) {
+            sh "sudo ./install ${NGROK_TOKEN}  ${SLACK_TOKEN} ${SLACK_URL}"
+        }
+    }
+}
