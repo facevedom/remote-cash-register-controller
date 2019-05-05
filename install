@@ -58,7 +58,7 @@ copy_source_code() {
     cp -f requirements.txt "$WORKING_DIR"
     cp -f config.ini "$WORKING_DIR"
     cp -f README.md "$WORKING_DIR"
-    cp -f service_files/run "$WORKING_DIR"
+    cp -f run "$WORKING_DIR"
 }
 
 # this will globally install the Python3 dependencies!

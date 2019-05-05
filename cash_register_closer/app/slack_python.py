@@ -230,4 +230,4 @@ c.execute("DROP TABLE reservation")
 c.execute('''CREATE TABLE reservation
              (user text, cashRegister text, date text, initialTimeReservation time, finishTimeReservation time)''')
 closeDB(conn, c)
-app.run(debug=True, port=5000)
+app.run(debug=True, port=5000, use_reloader=False)
