@@ -4,3 +4,7 @@ tunnels:
     proto: http
     addr: 5000
     bind_tls: true
+  jenkins:
+    proto: http
+    addr: 8080
+    bind_tls: true
