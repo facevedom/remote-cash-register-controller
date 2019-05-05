@@ -7,7 +7,6 @@ import os
 import json
 import threading
 from app.constants import *
-from time import gmtime, strftime
 from datetime import datetime
 from actuator.actuator_manager import ActuatorManager
 from helpers.config_loader import load_config, config_file_path
@@ -19,9 +18,6 @@ URL = os.getenv('SLACK_URL')
 TOKEN = os.getenv('SLACK_TOKEN')
 messageStack = []
 app = Flask(__name__)
-
-print(URL, TOKEN)
-
 
 def work():
     return 'work', 200
@@ -107,6 +103,13 @@ def getAvailability(cash_register, date, initial_hour, finish_hour, sql_service)
     if data:
         availability = False
         userReservation = data[ReservationTable.USER.value]
+    else:
+        sql_service.execute(ReservationTableQueries.INCLUDE_RESERVATIONS, [
+                        cash_register, date, initial_hour, finish_hour])
+        data = sql_service.fetchone()
+        if data:
+            availability = False
+            userReservation = data[ReservationTable.USER.value]
     return availability, userReservation
 
 
@@ -226,8 +229,7 @@ def initializeApp():
 
 initializeApp()
 conn, c = initDB()
-c.execute("DROP TABLE reservation")
-c.execute('''CREATE TABLE reservation
+c.execute('''CREATE TABLE IF NOT EXISTS reservation
              (user text, cashRegister text, date text, initialTimeReservation time, finishTimeReservation time)''')
 closeDB(conn, c)
 app.run(debug=True, port=5000, use_reloader=False)

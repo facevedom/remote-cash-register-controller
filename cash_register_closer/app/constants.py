@@ -17,7 +17,8 @@ class ReservationTable(Enum):
     FINISH_HOUR = 4
 class ReservationTableQueries:
     INSERT = "INSERT INTO reservation VALUES ('%s' ,'%s', '%s', '%s', '%s')"
-    EXISTING_RESERVATION = 'SELECT * FROM reservation WHERE cashRegister = ? and date = ? and (? >= initialTimeReservation and ? <= initialTimeReservation or ? >= finishTimeReservation and ? <= finishTimeReservation)'
+    EXISTING_RESERVATION = 'SELECT * FROM reservation WHERE cashRegister = ? and date = ? and (? >= initialTimeReservation and ? <= finishTimeReservation or ? >= initialTimeReservation and ? <= finishTimeReservation)'
+    INCLUDE_RESERVATIONS = 'SELECT * FROM reservation WHERE cashRegister = ? and date = ? and (? <= initialTimeReservation and ? >= finishTimeReservation)'
     GET_RESERVATIONS = 'SELECT * FROM reservation WHERE cashRegister = ? and date = ? ORDER BY initialTimeReservation'
     CAN_CLOSE_CASH_REGISTER = 'SELECT * FROM reservation WHERE cashRegister = ? and date = ? and ? >= initialTimeReservation and ? <= finishTimeReservation'
 class ResponseSlack:
