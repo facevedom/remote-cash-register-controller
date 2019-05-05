@@ -14,10 +14,11 @@ from helpers.config_loader import load_config, config_file_path
 config = load_config()
 actuator = ActuatorManager(config)
 
-URL = os.getenv('SLACK_URL')
-TOKEN = os.getenv('SLACK_TOKEN')
+URL = config['SYSTEM']['SLACK_URL']
+TOKEN = config['SYSTEM']['SLACK_TOKEN']
 messageStack = []
 app = Flask(__name__)
+
 
 def work():
     return 'work', 200
@@ -105,7 +106,7 @@ def getAvailability(cash_register, date, initial_hour, finish_hour, sql_service)
         userReservation = data[ReservationTable.USER.value]
     else:
         sql_service.execute(ReservationTableQueries.INCLUDE_RESERVATIONS, [
-                        cash_register, date, initial_hour, finish_hour])
+            cash_register, date, initial_hour, finish_hour])
         data = sql_service.fetchone()
         if data:
             availability = False

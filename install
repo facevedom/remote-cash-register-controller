@@ -2,6 +2,8 @@
 
 # set required variables
 NGROK_TOKEN="$1"
+SLACK_URL="$2"
+SLACK_TOKEN="$3"
 VERSION="$(grep VERSION config.ini | cut -f3 -d ' ')"
 WORKING_DIR="$(grep WORKING_DIRECTORY config.ini | cut -f3 -d ' ')"
 NGROK_BINARY_PATH="/usr/local/sbin/ngrok"
@@ -13,6 +15,7 @@ install() {
     clean_previous_version 
     ngrok_setup
     copy_source_code
+    set_env_variables
     fetch_dependencies
     register_system_service    
 }
@@ -50,6 +53,20 @@ ngrok_setup() {
     fi
 
     register_ngrok_service
+}
+
+set_env_variables() {
+    if [ "$SLACK_URL" == '' ]; then
+        echo "Please add a valid Slack URL as argument!"
+        exit 1
+    fi
+    if [ "$SLACK_TOKEN" == '' ]; then
+        echo "Please add a valid Slack token as argument!"
+        exit 1
+    fi
+
+    sed -i -e "s/##SLACK_TOKEN##/$SLACK_TOKEN/g" "$WORKING_DIR"/config.ini
+    sed -i -e "s@##SLACK_URL##@$SLACK_URL@g" "$WORKING_DIR"/config.ini
 }
 
 copy_source_code() {
