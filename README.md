@@ -21,7 +21,7 @@ To deploy this into a Raspberry Pi (model 3B) you need to follow this steps
 
 - Unzip our installer
 ``` bash
-mkdir temp && tar xvfz dist.tar.gz temp
+$ mkdir temp && tar xvfz dist.tar.gz temp
 ```
 
 - Modify [config.ini](config.ini). You only need to change:
@@ -31,7 +31,7 @@ mkdir temp && tar xvfz dist.tar.gz temp
 
 - Run the installer, replacing the tokens and URLs
 ```
-sudo ./install *Ngrok-token* *slack-url* *slack-token*
+$ sudo ./install *Ngrok-token* *slack-url* *slack-token*
 ```
 That's it!. This will set up Ngrok as needed, display the Ngrok URLs on a LCD screen (connected on `SDA1` and `SCL1` pins), and **it will start the application**.
 
@@ -42,43 +42,43 @@ That's it!. This will set up Ngrok as needed, display the Ngrok URLs on a LCD sc
 
 #### Ngrok
 ```
-sudo service ngrok start
+$ sudo service ngrok start
 ```
 ```
-sudo service ngrok stop
+$ sudo service ngrok stop
 ```
 ```
-sudo service ngrok restart
+$ sudo service ngrok restart
 ```
 ```
-sudo service ngrok status
+$ sudo service ngrok status
 ```
 > Everytime you restart the Ngrok service (or the Raspberry restarts), you'll need to update your new public URL in the Slack web app management console!
 
 #### This application
 ```
-sudo service cash_register_closer start
+$ sudo service cash_register_closer start
 ```
 ```
-sudo service cash_register_closer stop
+$ sudo service cash_register_closer stop
 ```
 ```
-sudo service cash_register_closer restart
+$ sudo service cash_register_closer restart
 ```
 ```
-sudo service cash_register_closer status
+$ sudo service cash_register_closer status
 ```
 > Everytime this application is started, it will check if Ngrok is running. If it is not running, Ngrok service will be started. If it is already running, this application will leave it alone :smile:
 
 ## Running the tests :scream:
 > This will only run on a Raspberry Pi 3B
 ```
-python3 test.py
+$ python3 test.py
 ```
 
 ## Caveats & Considerations :sweat_smile:
-- No other software can use Ngrok on the Raspberry when this is installed :disappointed:
-- This will install it's Python dependencies globally for your root user :hushed::hushed:
+- No other software can use Ngrok on the Raspberry when this is installed
+- This will install it's Python dependencies globally for your root user
 
 ## Built With :hammer:
 - [Flask](http://flask.pocoo.org/) - The web framework used
@@ -89,5 +89,5 @@ python3 test.py
 - **Felipe Acevedo** - [facevedom](https://github.com/PurpleBooth)
 - **Juan Mejia** - [JuanGMejia](https://github.com/JuanGMejia)
 
-## License :see_no_evil:
+## License
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
