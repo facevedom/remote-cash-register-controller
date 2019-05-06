@@ -6,7 +6,7 @@ from subprocess import check_output
 from helpers.config_loader import load_config
 
 config = load_config()
-logging_file_path = "{}/actuator.log".format(
+logging_file_path = "{}/application.log".format(
     config['SYSTEM']['WORKING_DIRECTORY'])
 
 
